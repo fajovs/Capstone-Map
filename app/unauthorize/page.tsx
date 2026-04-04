@@ -13,7 +13,7 @@ import {
 import { Kbd } from "@/components/ui/kbd"
 import { Link, SearchIcon } from "lucide-react"
 
-export function EmptyInputGroup() {
+export default function EmptyInputGroup() {
   return (
     <Empty>
       <EmptyHeader>
