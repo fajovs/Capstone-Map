@@ -1,0 +1,41 @@
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from "@/components/ui/empty"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group"
+import { Kbd } from "@/components/ui/kbd"
+import { Link, SearchIcon } from "lucide-react"
+
+export function EmptyInputGroup() {
+  return (
+    <Empty>
+      <EmptyHeader>
+        <EmptyTitle>403 - Access Denied</EmptyTitle>
+        <EmptyDescription>
+          You are not authorized to view this page.
+        </EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent>
+        <InputGroup className="sm:w-3/4">
+          <InputGroupInput placeholder="Try searching for pages..." />
+          <InputGroupAddon>
+            <SearchIcon />
+          </InputGroupAddon>
+          <InputGroupAddon align="inline-end">
+            <Kbd>/</Kbd>
+          </InputGroupAddon>
+        </InputGroup>
+        <EmptyDescription>
+          Return? <Link href="/">Home</Link>
+        </EmptyDescription>
+      </EmptyContent>
+    </Empty>
+  )
+}
