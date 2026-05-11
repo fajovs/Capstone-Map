@@ -2,20 +2,10 @@
 
 import {
   ChevronRight,
-  Folder,
-  MoreHorizontal,
-  Share,
-  Trash2,
   type LucideIcon,
 } from "lucide-react"
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -26,7 +16,6 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-  useSidebar,
 } from "@/components/ui/sidebar"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible"
 
@@ -44,7 +33,7 @@ export function NavUser({
     }[]
   }[]
 }) {
-  const { isMobile } = useSidebar()
+  
 
   return (
     <SidebarGroup className="group-data-[collapsible=icon]:hidden">

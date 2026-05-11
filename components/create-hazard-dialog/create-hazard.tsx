@@ -113,7 +113,7 @@ export function CreateHazard() {
     reset({
       status: "pending",
       title: "",
-      hazard_type: undefined,
+      hazard_type: undefined as any,
       location: "",
       description: "",
       latitude: 0,
@@ -135,6 +135,8 @@ export function CreateHazard() {
         data: { user },
       } = await supabase.auth.getUser();
 
+  
+
       if (!user) throw new Error("User not authenticated");
 
       const fileInput =
@@ -142,21 +144,26 @@ export function CreateHazard() {
 
       let imageUrl: string | null = null;
 
+    
+      
       if (fileInput) {
         const fileName = `${user.id}/${Date.now()}-${fileInput.name}`;
-
+   
         const { error: uploadError } = await supabase.storage
           .from("images")
           .upload(fileName, fileInput);
-
+    
         if (uploadError) throw uploadError;
 
         const { data: publicUrlData } = supabase.storage
           .from("images")
           .getPublicUrl(fileName);
-
+      
         imageUrl = publicUrlData.publicUrl;
+     
       }
+
+
 
       const { data: hazard, error: hazardError } = await supabase
         .from("hazards")
@@ -169,15 +176,14 @@ export function CreateHazard() {
         .select()
         .single();
 
+
       if (hazardError) throw hazardError;
 
       if (imageUrl) {
-        const { error: imageError } = await supabase.from("images").insert([
-          {
-            hazard_id: hazard.hazard_id,
-            url: imageUrl,
-          },
-        ] as any);
+        const { error: imageError } = await supabase.from("images").insert({
+          hazard_id: hazard.hazard_id,
+          url: imageUrl,
+        });
 
         if (imageError) throw imageError;
       }

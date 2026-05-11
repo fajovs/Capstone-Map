@@ -69,7 +69,7 @@ export function SignupForm({ ...props }: SignupFormProps) {
     try {
       const supabase = getSupabaseBrowserClient();
 
-      const { data, error } = await supabase.auth.signUp({
+      const { error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
@@ -85,10 +85,17 @@ export function SignupForm({ ...props }: SignupFormProps) {
         return;
       }
 
+     
       router.replace("/admin");
       router.refresh();
-    } catch (err: any) {
-      setStatus(err.message || "Failed to create account");
+    } catch (err: unknown) {
+      
+      if (err instanceof Error) {
+        setStatus(err.message || "Failed to create account");
+      } else {
+        console.error("Unknown error", err);
+      }
+      
     } finally {
       setIsLoading(false);
     }
@@ -127,7 +134,7 @@ export function SignupForm({ ...props }: SignupFormProps) {
                 {...register("email")}
               />
               <FieldDescription>
-                We'll use this to contact you. We will not share your email.
+                We&apos;ll use this to contact you. We will not share your email.
               </FieldDescription>
               {errors.email && (
                 <p className="text-red-500">{errors.email.message}</p>

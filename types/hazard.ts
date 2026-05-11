@@ -1,7 +1,7 @@
 export type Hazard = {
   hazard_id: string;
   title: string;
-  status: "pending" | "approved" | "under-maintenance" | "resolved";
+  status: "pending" | "approved" | "resolved" | "under-maintenance";
   location: string;
   hazard_type:
     | "Electrical"
@@ -11,14 +11,22 @@ export type Hazard = {
     | "Public Safety"
     | "Communication"
     | "Other";
+
   description: string;
+
   longitude: number;
   latitude: number;
-  started_at: Date | null;
-  resolved_at: Date | null;
-  created_at: string;
-  profile_id: string;
 
+  started_at: string | null;
+  resolved_at: string | null;
+
+  created_at: string;
+
+  profile_id: string | null;
+
+  images?: {
+    url: string;
+  }[];
 };
 
 export type Image = {

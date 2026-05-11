@@ -16,7 +16,7 @@ async function getData(): Promise<Profile[]> {
 
   if (error) throw error;
 
-  return data || [];
+  return (data ?? []) as Profile[]
 }
 
 export default async function UserManagementPage() {

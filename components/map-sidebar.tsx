@@ -27,6 +27,8 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { Hazard } from "@/types/hazard";
 import { Badge } from "./ui/badge";
 
+import type { Database } from "@/types/supabase";
+
 const hazardTypes = [
   "All",
   "Electrical",
@@ -66,11 +68,12 @@ async function getData(type: string): Promise<Hazard[]> {
     query = query.eq("hazard_type", type);
   }
 
-  const { data, error } = await query;
+  const { data, error } =
+    await query.returns<Database["public"]["Tables"]["hazards"]["Row"][]>();
 
   if (error) throw error;
 
-  return data || [];
+  return (data ?? []) as Hazard[];
 }
 
 export function MapSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -122,7 +125,6 @@ export function MapSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar {...props} className="z-[50]">
-      {/* HEADER */}
       <SidebarHeader className="space-y-4 shrink-0">
         <div className="p-4 pt-10 font-bold text-lg">Under-Maintenance</div>
 
