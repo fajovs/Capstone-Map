@@ -338,11 +338,14 @@ function ActionsCell({ hazard }: { hazard: Hazard }) {
       if (fetchError) throw fetchError;
 
       const fileNames =
-        images?.map((img) => {
-          const urlParts = img.url.split("/");
+        images
+          ?.map((img) => {
+            if (!img.url) return null;
 
-          return urlParts[urlParts.length - 1];
-        }) || [];
+            const urlParts = img.url.split("/");
+            return urlParts[urlParts.length - 1];
+          })
+          .filter((name): name is string => name !== null) || [];
 
       if (fileNames.length > 0) {
         const { error: storageError } = await supabase.storage
