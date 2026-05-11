@@ -1,21 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { format } from "date-fns";
-import { ChevronDownIcon } from "lucide-react";
 
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
-import { toast } from "sonner";
+
 import Image from "next/image";
 import dynamic from "next/dynamic";
 
@@ -23,14 +14,14 @@ import { Hazard } from "@/types/hazard";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
+
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -41,35 +32,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "../ui/field";
 
-const hazardUpdateSchema = z.object({
-  title: z.string().min(3, "Title is required"),
-  location: z.string().min(3, "Location is required"),
-  hazard_type: z.enum([
-    "Electrical",
-    "Structural",
-    "Transportation",
-    "Water/Drainage",
-    "Public Safety",
-    "Communication",
-    "Other",
-  ]),
-  description: z.string().min(10, "Description is too short"),
-  latitude: z.number().min(-90).max(90),
-  longitude: z.number().min(-180).max(180),
-  status: z.enum(["pending", "approved", "under-maintenance", "resolved"]),
-  started_at: z.date().nullable(),
-  resolved_at: z.date().nullable(),
-});
 
-type HazardUpdateValues = z.infer<typeof hazardUpdateSchema>;
+
+
+
+
+
 
 function ActionsCell({ hazard }: { hazard: Hazard }) {
   const supabase = getSupabaseBrowserClient();
@@ -162,7 +133,7 @@ function ActionsCell({ hazard }: { hazard: Hazard }) {
               <p className="font-medium text-sm">Location</p>
 
               <div className="h-48 border rounded-md overflow-hidden">
-                <MapWithNoSSR mode="single" coords={coords} />
+                <MapWithNoSSR mode="single" coords={coords} setCoords={() => {}}/>
               </div>
             </div>
           </div>
