@@ -25,7 +25,7 @@ async function getData(): Promise<Hazard[]> {
 
   if (error) throw error;
 
-  return data || [];
+  return (data ?? []) as Hazard[];
 }
 
 export default async function UserHazardMaintenancePage() {
