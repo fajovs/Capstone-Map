@@ -155,7 +155,7 @@ export function MapSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <div className="flex gap-3">
                 <div className="relative min-w-[60px] h-[60px] overflow-hidden rounded-md border">
                   <Image
-                    src={item.images?.[0]?.url || "/placeholder.jpg"}
+                    src={(item as any).images?.[0]?.url || "/placeholder.jpg"}
                     alt={item.title}
                     fill
                     sizes="60px"
