@@ -37,7 +37,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 type LoginFormProps = React.ComponentProps<typeof Card>;
 
 export function LoginForm({ ...props }: LoginFormProps) {
-  const supabase = getSupabaseBrowserClient();
+  
   const [status, setStatus] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -57,6 +57,7 @@ export function LoginForm({ ...props }: LoginFormProps) {
   async function onSubmit(values: LoginFormValues) {
     setStatus("");
     setIsLoading(true);
+    const supabase = await getSupabaseBrowserClient();
     const { error } = await supabase.auth.signInWithPassword({
       email: values.email,
       password: values.password,

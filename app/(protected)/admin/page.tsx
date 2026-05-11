@@ -1,29 +1,21 @@
-'use client'
-
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
+import { AdminSectionCards } from "@/components/admin-section-cards copy";
 
 
-export default function AdminPage() {
-  const router = useRouter();
-  const supabase = getSupabaseBrowserClient();
 
-  async function handleLogout() {
-    const { error } = await supabase.auth.signOut();
-
-    if (error) {
-      console.error(error.message);
-      return;
-    }
-
-    router.replace("/login");
-    router.refresh();
-  }
+export default async function AdminPage() {
+ 
 
   return (
-  
-        <h1 className="text-xl font-bold">Admin Page</h1>
+    <>
+      <h1 className="text-xl font-bold">Admin Dashboard</h1>
 
+      <div className="flex flex-1 flex-col">
+        <div className="@container/main flex flex-1 flex-col gap-2">
+          <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+            <AdminSectionCards/>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

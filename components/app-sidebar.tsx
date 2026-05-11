@@ -12,12 +12,14 @@ import {
   Send,
   Settings2,
   SquareTerminal,
+  Building2,
+  LayoutDashboard
 } from "lucide-react"
 
-import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
-import { NavSecondary } from "@/components/nav-secondary"
+import { NavAdmin } from "@/components/nav-admin"
 import { NavUser } from "@/components/nav-user"
+import { NavSecondary } from "@/components/nav-secondary"
+import { NavProfile } from "@/components/nav-profile"
 import {
   Sidebar,
   SidebarContent,
@@ -29,6 +31,7 @@ import {
 } from "@/components/ui/sidebar"
 import { useEffect, useState } from "react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client"
+import { CreateHazard } from "./create-hazard-dialog/create-hazard"
 
 const data = {
   user: {
@@ -36,120 +39,74 @@ const data = {
     email: "",
     avatar: "",
   },
-  navMain: [
+  adminnavigation: [
+     {
+      title: "Dashboard",
+      url: "/admin",
+      icon: SquareTerminal,
+      isActive: true,
+    },
     {
-      title: "Navigation Item #1",
+      title: "Hazards",
       url: "#",
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
-          title: "Navigation Sub-Item #1",
-          url: "#",
+          title: "Pending",
+          url: "/admin/hazard-management/pending",
         },
         {
-          title: "Navigation Sub-Item #2",
-          url: "#",
+          title: "Approved",
+          url: "/admin/hazard-management/approved",
         },
         {
-          title: "Navigation Sub-Item #3",
-          url: "#",
+          title: "Under-Maintenance",
+          url: "/admin/hazard-management/under-maintenance",
+        },
+        {
+          title: "Resolved",
+          url: "/admin/hazard-management/resolved",
         },
       ],
     },
     {
-      title: "Navigation Item #2",
-      url: "#",
+      title: "User Management",
+      url: "/admin/user-management",
       icon: Bot,
-      items: [
-        {
-          title: "Navigation Sub-Item #1",
-          url: "#",
-        },
-        {
-          title: "Navigation Sub-Item #2",
-          url: "#",
-        },
-        {
-          title: "Navigation Sub-Item #3",
-          url: "#",
-        },
-      ],
     },
+  
+  ],
+  usernavigation: [
     {
-      title: "Navigation Item #3",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Navigation Sub-Item #1",
-          url: "#",
-        },
-        {
-          title: "Navigation Sub-Item #2",
-          url: "#",
-        },
-        {
-          title: "Navigation Sub-Item #3",
-          url: "#",
-        },
-        {
-          title: "Navigation Sub-Item #4",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Navigation Item #4",
-      url: "#",
+      title: "User Dashboard",
+      url: "/user",
       icon: Settings2,
-      items: [
+      
+    },
+    {
+      title: "Hazard Request",
+      url: "#",
+      icon: Building2,
+      isActive: true,
+         items: [
         {
-          title: "Navigation Sub-Item #1",
-          url: "#",
+          title: "Pending",
+          url: "/user/hazard/pending",
         },
         {
-          title: "Navigation Sub-Item #2",
-          url: "#",
+          title: "Approved",
+          url: "/user/hazard/approved",
         },
         {
-          title: "Navigation Sub-Item #3",
-          url: "#",
+          title: "Under-Maintenance",
+          url: "/user/hazard/under-maintenance",
         },
         {
-          title: "Navigation Sub-Item #4",
-          url: "#",
+          title: "Resolved",
+          url: "/user/hazard/resolved",
         },
       ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Support",
-      url: "#",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "#",
-      icon: Send,
-    },
-  ],
-  projects: [
-    {
-      name: "User Navigation #1",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "User Navigation #2",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "User Navigation #3",
-      url: "#",
-      icon: Map,
     },
   ],
 }
@@ -198,13 +155,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {user?.role == "admin" && <NavMain items={data.navMain}/>}
-        {user?.role == "user" && <NavProjects projects={data.projects} />}
+        {user?.role == "admin" && <NavAdmin adminNav={data.adminnavigation}/>}
+        {user?.role == "user" && <NavUser userNav={data.usernavigation} />}
         
         {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={user || {}} />
+        <CreateHazard/>
+        <NavProfile user={user || {}} />
       </SidebarFooter>
     </Sidebar>
   )

@@ -19,10 +19,10 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
 
-export function NavMain({
-  items,
+export function NavAdmin({
+  adminNav,
 }: {
-  items: {
+  adminNav: {
     title: string
     url: string
     icon: LucideIcon
@@ -37,7 +37,7 @@ export function NavMain({
     <SidebarGroup>
       <SidebarGroupLabel>Admin Navigation</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
+        {adminNav.map((item) => (
           <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip={item.title}>

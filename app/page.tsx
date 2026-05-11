@@ -6,5 +6,5 @@ import LocationPage from "./location-list/page";
 
 
 export default function Home() {
-  redirect("/location-list");
+  return redirect("/location-list");
 }
