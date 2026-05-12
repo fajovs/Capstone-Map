@@ -1,4 +1,5 @@
 "use client";
+
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import dynamic from "next/dynamic";
@@ -25,7 +26,6 @@ import {
   Field,
   FieldGroup,
   FieldLabel,
-  FieldDescription,
 } from "@/components/ui/field";
 
 import { Input } from "@/components/ui/input";
@@ -33,17 +33,22 @@ import { Spinner } from "../ui/spinner";
 import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { toast } from "sonner";
 
-const MapWithNoSSR = dynamic(() => import("../../components/map"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex w-full h-full items-center justify-center">
-      <Spinner />
-    </div>
-  ),
-});
+/* MAP */
+const MapWithNoSSR = dynamic(
+  () => import("../map"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex w-full h-full items-center justify-center">
+        <Spinner />
+      </div>
+    ),
+  },
+);
+
 
 const hazardSchema = z.object({
-  title: z.string().min(3, "Title is required"),
+  title: z.string().min(3),
 
   hazard_type: z.enum([
     "Electrical",
@@ -55,14 +60,13 @@ const hazardSchema = z.object({
     "Other",
   ]),
 
-  location: z.string().min(3, "Location is required"),
+  location: z.string().min(3),
 
-  description: z.string().min(10, "Description is too short"),
+  description: z.string().min(10),
 
   status: z.literal("pending"),
 
   latitude: z.number(),
-
   longitude: z.number(),
 });
 
@@ -72,9 +76,9 @@ export function CreateHazard() {
   const router = useRouter();
 
   const [open, setOpen] = useState(false);
-
   const [preview, setPreview] = useState<string | null>(null);
 
+  /* ✅ SINGLE LOCATION ONLY */
   const [coords, setCoords] = useState<{
     lat: number;
     lng: number;
@@ -95,9 +99,11 @@ export function CreateHazard() {
 
   const canShowDetails = preview && coords;
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  /* IMAGE */
+  const handleImageChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = e.target.files?.[0];
-
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
@@ -108,6 +114,7 @@ export function CreateHazard() {
     const url = URL.createObjectURL(file);
     setPreview(url);
   };
+
 
   const clearForm = () => {
     reset({
@@ -123,10 +130,13 @@ export function CreateHazard() {
     setPreview(null);
     setCoords(null);
 
-    const fileInput = document.querySelector<HTMLInputElement>("#image");
+    const fileInput =
+      document.querySelector<HTMLInputElement>("#image");
+
     if (fileInput) fileInput.value = "";
   };
 
+ 
   const onSubmit = async (data: HazardFormValues) => {
     try {
       const supabase = getSupabaseBrowserClient();
@@ -135,67 +145,63 @@ export function CreateHazard() {
         data: { user },
       } = await supabase.auth.getUser();
 
-  
-
       if (!user) throw new Error("User not authenticated");
 
       const fileInput =
-        document.querySelector<HTMLInputElement>("#image")?.files?.[0];
+        document.querySelector<HTMLInputElement>(
+          "#image",
+        )?.files?.[0];
 
       let imageUrl: string | null = null;
 
-    
-      
       if (fileInput) {
         const fileName = `${user.id}/${Date.now()}-${fileInput.name}`;
-   
-        const { error: uploadError } = await supabase.storage
-          .from("images")
-          .upload(fileName, fileInput);
-    
+
+        const { error: uploadError } =
+          await supabase.storage
+            .from("images")
+            .upload(fileName, fileInput);
+
         if (uploadError) throw uploadError;
 
-        const { data: publicUrlData } = supabase.storage
-          .from("images")
-          .getPublicUrl(fileName);
-      
+        const { data: publicUrlData } =
+          supabase.storage
+            .from("images")
+            .getPublicUrl(fileName);
+
         imageUrl = publicUrlData.publicUrl;
-     
       }
 
+    
+      const { data: hazard, error } =
+        await supabase
+          .from("hazards")
+          .insert({
+            ...data,
+            profile_id: user.id,
+            latitude: coords?.lat ?? null,
+            longitude: coords?.lng ?? null,
+          } as never)
+          .select()
+          .single();
 
+      if (error) throw error;
 
-      const { data: hazard, error: hazardError } = await supabase
-        .from("hazards")
-        .insert({
-          ...data,
-          profile_id: user?.id,
-          latitude: coords?.lat ?? null,
-          longitude: coords?.lng ?? null,
-        } as never)
-        .select()
-        .single();
-
-
-      if (hazardError) throw hazardError;
-
+    
       if (imageUrl) {
-        const { error: imageError } = await supabase.from("images").insert({
-          hazard_id: hazard.hazard_id,
-          url: imageUrl,
-        });
+        const { error: imageError } =
+          await supabase.from("images").insert({
+            hazard_id: hazard.hazard_id,
+            url: imageUrl,
+          });
 
         if (imageError) throw imageError;
       }
 
-      toast.success("Hazard created successfully", {
-        description: `${data.title} has been submitted`,
-      });
+      toast.success("Hazard created successfully");
 
       clearForm();
-
       setOpen(false);
-
       router.refresh();
     } catch (err: any) {
       toast.error("Failed to create hazard", {
@@ -204,21 +210,26 @@ export function CreateHazard() {
     }
   };
 
-  const handleCoordsChange = (value: { lat: number; lng: number }) => {
-    setCoords(value);
 
-    setValue("latitude", value.lat);
-    setValue("longitude", value.lng);
+  const handleCoordsChange = (value: {
+    lat: number;
+    lng: number;
+  }) => {
+    const single = {
+      lat: value.lat,
+      lng: value.lng,
+    };
+
+    setCoords(single);
+
+    setValue("latitude", single.lat);
+    setValue("longitude", single.lng);
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={() => setOpen(true)}
-        >
+        <Button variant="outline" className="w-full">
           Create Request
         </Button>
       </DialogTrigger>
@@ -227,8 +238,7 @@ export function CreateHazard() {
         <DialogHeader>
           <DialogTitle>Create Hazard Request</DialogTitle>
           <DialogDescription>
-            Report a hazard by selecting location, uploading a photo, and adding
-            details.
+            Select ONE location, upload image, and submit.
           </DialogDescription>
         </DialogHeader>
 
@@ -239,8 +249,10 @@ export function CreateHazard() {
           <div className="flex-1 overflow-y-auto pr-2">
             <FieldGroup className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+           
                 <Field>
-                  <FieldLabel htmlFor="image">Image</FieldLabel>
+                  <FieldLabel>Image</FieldLabel>
 
                   <Input
                     id="image"
@@ -254,23 +266,20 @@ export function CreateHazard() {
                     <div className="relative mt-2 w-full h-48 rounded-md border overflow-hidden">
                       <Image
                         src={preview}
-                        alt="Hazard preview"
+                        alt="preview"
                         fill
                         className="object-cover"
                         unoptimized
                       />
                     </div>
                   )}
-
-                  <FieldDescription>
-                    Take a photo or upload an image.
-                  </FieldDescription>
                 </Field>
 
+               
                 <Field>
-                  <FieldLabel>Pick Location</FieldLabel>
+                  <FieldLabel>Pick ONE Location</FieldLabel>
 
-                  <div className="h-64 md:h-72 w-full rounded-md overflow-hidden border">
+                  <div className="h-64 w-full border rounded-md overflow-hidden">
                     <MapWithNoSSR
                       mode="single"
                       coords={coords}
@@ -287,22 +296,19 @@ export function CreateHazard() {
                 </Field>
               </div>
 
+           
               {canShowDetails && (
-                <div className="space-y-4 pt-2 border-t">
+                <div className="space-y-4 border-t pt-4">
+
                   <Field>
-                    <FieldLabel htmlFor="title">Title</FieldLabel>
+                    <FieldLabel>Title</FieldLabel>
                     <Input {...register("title")} />
-                    {errors.title && (
-                      <p className="text-sm text-red-500">
-                        {errors.title.message}
-                      </p>
-                    )}
                   </Field>
 
                   <Field>
-                    <FieldLabel htmlFor="hazard_type">Hazard Type</FieldLabel>
+                    <FieldLabel>Type</FieldLabel>
                     <select
-                      className="w-full rounded-md border px-3 py-2 text-sm"
+                      className="w-full border rounded-md px-3 py-2"
                       {...register("hazard_type")}
                     >
                       <option value="Electrical">Electrical</option>
@@ -316,26 +322,16 @@ export function CreateHazard() {
                   </Field>
 
                   <Field>
-                    <FieldLabel htmlFor="location">Location</FieldLabel>
+                    <FieldLabel>Location Name</FieldLabel>
                     <Input {...register("location")} />
-                    {errors.location && (
-                      <p className="text-sm text-red-500">
-                        {errors.location.message}
-                      </p>
-                    )}
                   </Field>
 
                   <Field>
-                    <FieldLabel htmlFor="description">Description</FieldLabel>
+                    <FieldLabel>Description</FieldLabel>
                     <textarea
-                      className="min-h-32 w-full rounded-md border px-3 py-2 text-sm"
+                      className="w-full border rounded-md px-3 py-2 min-h-28"
                       {...register("description")}
                     />
-                    {errors.description && (
-                      <p className="text-sm text-red-500">
-                        {errors.description.message}
-                      </p>
-                    )}
                   </Field>
 
                   <input type="hidden" {...register("status")} />

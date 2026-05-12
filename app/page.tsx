@@ -1,7 +1,7 @@
 'use client'
 
 import { redirect } from "next/navigation";
-import LocationPage from "./location-list/page";
+
 
 
 

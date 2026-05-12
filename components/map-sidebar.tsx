@@ -9,6 +9,9 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
 
@@ -27,7 +30,8 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/browser-client";
 import { Hazard } from "@/types/hazard";
 import { Badge } from "./ui/badge";
 
-import type { Database } from "@/types/supabase";
+import { useMapContext } from "@/contexts/map-context";
+import { Command } from "lucide-react";
 
 const hazardTypes = [
   "All",
@@ -41,13 +45,13 @@ const hazardTypes = [
 ];
 
 const hazardColors: Record<string, string> = {
-  Electrical: "bg-yellow-100 text-yellow-700 border-yellow-200",
-  Structural: "bg-red-100 text-red-700 border-red-200",
-  Transportation: "bg-blue-100 text-blue-700 border-blue-200",
-  "Water/Drainage": "bg-cyan-100 text-cyan-700 border-cyan-200",
-  "Public Safety": "bg-orange-100 text-orange-700 border-orange-200",
-  Communication: "bg-purple-100 text-purple-700 border-purple-200",
-  Other: "bg-gray-100 text-gray-700 border-gray-200",
+  Electrical: "bg-yellow-100 text-yellow-700",
+  Structural: "bg-red-100 text-red-700",
+  Transportation: "bg-blue-100 text-blue-700",
+  "Water/Drainage": "bg-cyan-100 text-cyan-700",
+  "Public Safety": "bg-orange-100 text-orange-700",
+  Communication: "bg-purple-100 text-purple-700",
+  Other: "bg-gray-100 text-gray-700",
 };
 
 async function getData(type: string): Promise<Hazard[]> {
@@ -55,44 +59,46 @@ async function getData(type: string): Promise<Hazard[]> {
 
   let query = supabase
     .from("hazards")
-    .select(
-      `
-      *,
-      images (*)
-    `,
-    )
-    .eq("status", "under-maintenance")
+    .select(`*, images (*)`)
+    .in("status", ["under-maintenance", "approved"])
     .order("created_at", { ascending: false });
 
   if (type !== "All") {
     query = query.eq("hazard_type", type);
   }
 
-  const { data, error } =
-    await query.returns<Database["public"]["Tables"]["hazards"]["Row"][]>();
+  const { data, error } = await query;
 
   if (error) throw error;
 
   return (data ?? []) as Hazard[];
 }
 
-export function MapSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function MapSidebar(props: React.ComponentProps<typeof Sidebar>) {
   const [mounted, setMounted] = React.useState(false);
+
   const [user, setUser] = React.useState<any>(null);
-  const [hazards, setHazards] = React.useState<Hazard[]>([]);
-  const [selectedType, setSelectedType] = React.useState("All");
 
   const supabase = getSupabaseBrowserClient();
+
+  const {
+    hazards,
+    setHazards,
+    selectedHazard,
+    setSelectedHazard,
+    selectedType,
+    setSelectedType,
+  } = useMapContext();
 
   React.useEffect(() => {
     setMounted(true);
 
-    const loadData = async () => {
+    const load = async () => {
       const data = await getData(selectedType);
       setHazards(data);
     };
 
-    loadData();
+    load();
 
     const getUser = async () => {
       const {
@@ -111,33 +117,58 @@ export function MapSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     });
 
     return () => subscription.unsubscribe();
-  }, [supabase, selectedType]);
+  }, [selectedType]);
 
   if (!mounted) {
     return (
       <Sidebar {...props} className="w-[360px]">
-        <SidebarHeader className="h-12" />
-        <SidebarContent className="gap-0" />
+        <SidebarHeader />
+        <SidebarContent />
         <SidebarRail />
       </Sidebar>
     );
   }
 
+  const filtered =
+    selectedType === "All"
+      ? hazards
+      : hazards.filter((h) => h.hazard_type === selectedType);
+
   return (
     <Sidebar {...props} className="z-[50]">
-      <SidebarHeader className="space-y-4 shrink-0">
-        <div className="p-4 pt-10 font-bold text-lg">Under-Maintenance</div>
+      <SidebarHeader className="space-y-4">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg" asChild>
+              <a href="/location-list">
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                  <Command className="size-4" />
+                </div>
+                <div className="grid flex-1 text-left text-sm leading-tight">
+                  <span className="truncate font-medium">AccessAbility</span>
+                  <span className="truncate text-xs">System</span>
+                </div>
+              </a>
+            </SidebarMenuButton>
+            <div className="p-3 font-bold text-lg">Hazard List</div>
+          </SidebarMenuItem>
+        </SidebarMenu>
 
         <div className="px-4">
           <Select value={selectedType} onValueChange={setSelectedType}>
-            <SelectTrigger className="w-full text-sm">
-              <SelectValue placeholder="Filter by hazard type" />
+            <SelectTrigger>
+              <SelectValue placeholder="Select type" />
             </SelectTrigger>
 
-            <SelectContent>
-              {hazardTypes.map((type) => (
-                <SelectItem key={type} value={type}>
-                  {type}
+            <SelectContent
+              position="popper"
+              side="bottom"
+              align="start"
+              className="z-[9999]"
+            >
+              {hazardTypes.map((t) => (
+                <SelectItem key={t} value={t}>
+                  {t}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -145,49 +176,40 @@ export function MapSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </div>
       </SidebarHeader>
 
-      {/* CONTENT (SCROLLABLE) */}
-      <SidebarContent className="flex-1 overflow-y-auto p-4 space-y-3">
-        {hazards.length === 0 && (
-          <div className="text-xs text-muted-foreground">No hazards found.</div>
-        )}
+      <SidebarContent className="p-4 space-y-3 overflow-y-auto">
+        {filtered.map((item) => (
+          <Card
+            key={item.hazard_id}
+            className={`cursor-pointer transition ${
+              selectedHazard?.hazard_id === item.hazard_id
+                ? "border-primary bg-muted/40"
+                : ""
+            }`}
+            onClick={() => {
+              setSelectedHazard(item);
+            }}
+          >
+            <CardContent className="p-2 flex gap-3">
+              <div className="relative w-[60px] h-[60px]">
+                <Image
+                  src={item.images?.[0]?.url || "/placeholder.jpg"}
+                  alt={item.title}
+                  fill
+                  className="object-cover rounded-md"
+                  sizes="220px"
+                />
+              </div>
 
-        {hazards.map((item) => (
-          <Card key={item.hazard_id}>
-            <CardContent className="p-2">
-              <div className="flex gap-3">
-                <div className="relative min-w-[60px] h-[60px] overflow-hidden rounded-md border">
-                  <Image
-                    src={(item as any).images?.[0]?.url || "/placeholder.jpg"}
-                    alt={item.title}
-                    fill
-                    sizes="60px"
-                    className="object-cover"
-                  />
+              <div className="flex-1">
+                <div className="text-sm font-semibold">{item.title}</div>
+
+                <div className="text-xs text-muted-foreground">
+                  {item.location}
                 </div>
-
-                <div className="flex-1 min-w-0 space-y-1">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="text-sm font-semibold truncate">
-                      {item.title}
-                    </div>
-                  </div>
-
-                  <div className="text-xs text-muted-foreground truncate">
-                    {item.location}
-                  </div>
-
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="text-[11px] text-muted-foreground">
-                      {new Date(
-                        item.started_at || item.created_at,
-                      ).toLocaleDateString()}
-                    </div>
-
-                    <Badge className={hazardColors[item.hazard_type]}>
-                      {item.hazard_type}
-                    </Badge>
-                  </div>
-                </div>
+           
+                <Badge className={hazardColors[item.hazard_type]}>
+                  {item.hazard_type}
+                </Badge>
               </div>
             </CardContent>
           </Card>
@@ -195,16 +217,14 @@ export function MapSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
 
       {/* FOOTER */}
-      <SidebarFooter className="p-4 shrink-0">
+      <SidebarFooter className="p-4">
         {user ? (
-          <Link href="/user" className="w-full">
-            <Button className="w-full text-sm" variant="outline">
-              Go to Dashboard
-            </Button>
+          <Link href="/user">
+            <Button className="w-full">Dashboard</Button>
           </Link>
         ) : (
-          <Link href="/login" className="w-full">
-            <Button className="w-full text-sm">Login Account</Button>
+          <Link href="/login">
+            <Button className="w-full">Login</Button>
           </Link>
         )}
       </SidebarFooter>

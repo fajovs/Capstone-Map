@@ -90,7 +90,7 @@ export function LoginForm({ ...props }: LoginFormProps) {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="m@example.com"
+                  placeholder="juandelacruz@example.com
                   {...register("email")}
                 />
                 {errors.email && (

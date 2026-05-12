@@ -2,23 +2,15 @@
 
 
 import {
-  BookOpen,
   Bot,
   Command,
-  Frame,
-  LifeBuoy,
-  Map,
-  PieChart,
-  Send,
   Settings2,
   SquareTerminal,
   Building2,
-  LayoutDashboard
 } from "lucide-react"
 
 import { NavAdmin } from "@/components/nav-admin"
 import { NavUser } from "@/components/nav-user"
-import { NavSecondary } from "@/components/nav-secondary"
 import { NavProfile } from "@/components/nav-profile"
 import {
   Sidebar,
@@ -141,12 +133,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <a href="/location-list">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">Capstone Project</span>
+                  <span className="truncate font-medium">AccessAbility</span>
                   <span className="truncate text-xs">System</span>
                 </div>
               </a>
@@ -158,7 +150,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         {user?.role == "admin" && <NavAdmin adminNav={data.adminnavigation}/>}
         {user?.role == "user" && <NavUser userNav={data.usernavigation} />}
         
-        {/* <NavSecondary items={data.navSecondary} className="mt-auto" /> */}
+    
       </SidebarContent>
       <SidebarFooter>
         <CreateHazard/>

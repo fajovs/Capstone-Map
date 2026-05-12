@@ -117,7 +117,7 @@ export function SignupForm({ ...props }: SignupFormProps) {
               <Input
                 id="fullName"
                 type="text"
-                placeholder="John Doe"
+                placeholder="Juan Dela Cruz"
                 {...register("fullName")}
               />
               {errors.fullName && (
@@ -130,7 +130,7 @@ export function SignupForm({ ...props }: SignupFormProps) {
               <Input
                 id="email"
                 type="email"
-                placeholder="m@example.com"
+                placeholder="juandelacruz@example.com"
                 {...register("email")}
               />
               <FieldDescription>

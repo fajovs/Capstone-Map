@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { format } from "date-fns";
-import { ChevronDownIcon } from "lucide-react";
 
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -113,7 +112,7 @@ function ActionsCell({ hazard }: { hazard: Hazard }) {
     lng: hazard.longitude,
   });
 
-  const MapWithNoSSR = dynamic(() => import("../../components/map"), {
+  const MapWithNoSSR = dynamic(() => import("../map"), {
     ssr: false,
   });
 
@@ -486,9 +485,10 @@ function ActionsCell({ hazard }: { hazard: Hazard }) {
 
                       <div className="h-64 w-full border rounded-md overflow-hidden">
                         <MapWithNoSSR
-                          mode="single"
+                       
                           coords={coords}
                           setCoords={isEditing ? handleCoordsChange : undefined}
+                          clickable={true}
                         />
                       </div>
                     </Field>

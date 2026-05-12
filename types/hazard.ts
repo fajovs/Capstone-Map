@@ -43,3 +43,8 @@ export type Profile = {
   role: "user" | "admin";
   created_at: string;
 };
+
+export type Coordinate = {
+  lat: number;
+  lng: number;
+};
