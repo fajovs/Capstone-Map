@@ -62,7 +62,7 @@ function ActionsCell({ hazard }: { hazard: Hazard }) {
     fetchImage();
   }, [hazard.hazard_id]);
 
-  const MapWithNoSSR = dynamic(() => import("../map-location-list"), {
+  const MapWithNoSSR = dynamic(() => import("../map"), {
     ssr: false,
   });
 
