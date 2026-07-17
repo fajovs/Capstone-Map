@@ -159,6 +159,7 @@ export function CreateHazard() {
       if (imageFile) {
         const fileName = `${user.id}/${Date.now()}-${imageFile.name}`;
 
+
         const { error: uploadError } = await supabase.storage
           .from("images")
           .upload(fileName, imageFile);

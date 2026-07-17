@@ -226,6 +226,15 @@ function ActionsCell({ hazard }: { hazard: Hazard }) {
         return;
       }
 
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        toast.error("User not authenticated");
+        return;
+      }
+
       if (
         data.status === "resolved" &&
         (!data.started_at || !data.resolved_at)
@@ -245,7 +254,11 @@ function ActionsCell({ hazard }: { hazard: Hazard }) {
       const cameraFile = cameraInputRef.current?.files?.[0];
       const galleryFile = galleryInputRef.current?.files?.[0];
 
-      const file = cameraFile || galleryFile;
+      const file = cameraFile ?? galleryFile;
+
+      if (!file) {
+        console.log("No image selected");
+      }
 
       if (file) {
         let oldFileName: string | null = null;
@@ -256,7 +269,7 @@ function ActionsCell({ hazard }: { hazard: Hazard }) {
           oldFileName = urlParts[urlParts.length - 1];
         }
 
-        const fileName = `${Date.now()}-${file.name}`;
+        const fileName = `${user.id}/${Date.now()}-${file.name}`;
 
         const { error: uploadError } = await supabase.storage
           .from("images")
@@ -601,7 +614,7 @@ function ActionsCell({ hazard }: { hazard: Hazard }) {
 
                       <select
                         {...register("status")}
-                        disabled={!isEditing || !isAdmin }
+                        disabled={!isEditing || !isAdmin}
                         className="w-full border p-2 rounded-md disabled:opacity-70"
                       >
                         <option value="pending">Pending</option>
@@ -689,11 +702,9 @@ function ActionsCell({ hazard }: { hazard: Hazard }) {
 
                 {!isEditing ? (
                   <>
-                
-                      <Button type="button" onClick={() => setIsEditing(true)}>
-                        Edit
-                      </Button>
-             
+                    <Button type="button" onClick={() => setIsEditing(true)}>
+                      Edit
+                    </Button>
                   </>
                 ) : (
                   <>
